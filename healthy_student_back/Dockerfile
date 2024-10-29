@@ -1,6 +1,10 @@
+FROM maven:3.9-eclipse-temurin-21 as builder
+WORKDIR /app
+COPY . /app/.
+RUN mvn -f /app/pom.xml clean package -Dmaven.test.skip=true
+
 FROM openjdk:21
 WORKDIR /app
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} /app/*.jar
+COPY --from=builder /app/target/*.jar /app/*.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/*.jar"]
