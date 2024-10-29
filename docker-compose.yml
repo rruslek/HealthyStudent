@@ -1,0 +1,40 @@
+services:
+  frontend:
+    image: 'healthy_student_front_web:latest'
+    build: ./healthy_student_front_web
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - /app/node_modules
+      - ./healthy_student_front_web:/app
+  backend:
+    image: 'healthy_student_back:latest'
+    build:
+      context: ./healthy_student_back
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - SERVER_PORT= 8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/healthyStudent
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=870125
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  db:
+    image: 'postgres:17.0'
+    container_name: db
+    environment:
+      - POSTGRES_DB=healthyStudent
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=870125
+    volumes:
+      - ./create_db.sql:/docker-entrypoint-initdb.d/create_db.sql
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  db-data:
